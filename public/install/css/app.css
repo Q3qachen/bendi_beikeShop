@@ -1,0 +1,127 @@
+/**
+ * @copyright     2022 beikeshop.com - All Rights Reserved.
+ * @link          https://beikeshop.com
+ * @Author        guangda <service@guangda.work>
+ * @Date          2022-08-26 14:38:13
+ * @LastEditTime  2022-09-19 09:59:48
+ */
+body {
+  background-color: #f3f6f8;
+}
+body .install-box {
+  background-color: #f3f6f8;
+  display: flex;
+  margin: auto;
+  height: 100%;
+}
+body .install-box > .aside-wrap {
+  width: 30%;
+  max-width: 460px;
+  background-color: #fff;
+  padding: 40px 20px 40px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow-y: auto;
+}
+@media (max-width: 768px) {
+  body .install-box > .aside-wrap {
+    padding: 20px;
+  }
+}
+body .install-box > .content {
+  flex: 1;
+  padding: 40px 60px;
+  overflow-y: auto;
+}
+body .install-box .language-switch .form-select {
+  width: auto;
+}
+body .table {
+  --bs-table-bg: transparent;
+}
+
+/**
+ * @copyright     2022 beikeshop.com - All Rights Reserved.
+ * @link          https://beikeshop.com
+ * @Author        guangda <service@guangda.work>
+ * @Date          2022-09-16 11:38:13
+ * @LastEditTime  2022-09-19 09:59:42
+ */
+.aside-wrap .logo img {
+  max-width: 180px;
+}
+.aside-wrap .steps-wrap ul {
+  padding-left: 0;
+  list-style: none;
+}
+.aside-wrap .steps-wrap ul li {
+  margin-bottom: 30px;
+  font-size: 16px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.aside-wrap .steps-wrap ul li .left {
+  display: flex;
+  align-items: center;
+}
+.aside-wrap .steps-wrap ul li .right {
+  display: none;
+}
+.aside-wrap .steps-wrap ul li span.index {
+  width: 40px;
+  flex: 0 0 40px;
+  height: 40px;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 14px;
+  color: #666;
+}
+.aside-wrap .steps-wrap ul li.success {
+  color: #999;
+}
+.aside-wrap .steps-wrap ul li.success span.index {
+  background-color: #5dca86;
+  border-color: #5dca86;
+  color: #fff;
+}
+.aside-wrap .steps-wrap ul li.success span.index i {
+  font-size: 24px;
+}
+.aside-wrap .steps-wrap ul li.ing {
+  color: #fd560f;
+}
+.aside-wrap .steps-wrap ul li.ing span.index {
+  border-color: #fd560f;
+  color: #fd560f;
+}
+.aside-wrap .steps-wrap ul li.ing span.index i {
+  font-size: 24px;
+}
+.aside-wrap .steps-wrap ul li.ing .right {
+  display: block;
+}
+.aside-wrap .steps-wrap ul li.ing .right i {
+  font-size: 24px;
+  line-height: 1;
+}
+
+/**
+ * @copyright     2022 beikeshop.com - All Rights Reserved.
+ * @link          https://beikeshop.com
+ * @Author        guangda <service@guangda.work>
+ * @Date          2022-08-22 10:31:45
+ * @LastEditTime  2022-09-19 09:59:36
+ */
+.install-1 .welcome-img {
+  max-width: 400px;
+  margin: 60px 0;
+}
+.install-1 .guide-text {
+  max-width: 500px;
+}
