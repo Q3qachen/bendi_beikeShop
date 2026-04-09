@@ -9,6 +9,12 @@
 
   @section('page-title-right')
     @if ($type != 'trashed')
+      @can('orders_create')
+      <a href="{{ admin_route('orders.create_for_customer.create') }}"
+         class="btn btn-primary btn-sm me-2">
+        <i class="bi bi-person-plus-fill"></i> 代客下单
+      </a>
+      @endcan
       <button type="button" class="btn btn-outline-secondary btn-print" onclick="app.btnPrint()"><i
           class="bi bi-printer-fill"></i> {{ __('admin/order.btn_print') }}</button>
       @hook('admin.order.list.buttons')

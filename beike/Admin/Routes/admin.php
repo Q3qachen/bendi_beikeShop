@@ -168,6 +168,19 @@ Route::prefix($adminName)
                 Route::middleware('can:orders_export')->get('orders/export', [Controllers\OrderController::class, 'export'])->name('orders.export');
                 Route::middleware('can:orders_show')->get('orders/shipping', [Controllers\OrderController::class, 'shipping'])->name('orders.shipping.get');
                 Route::middleware('can:orders_show')->post('orders/shipping', [Controllers\OrderController::class, 'shipping'])->name('orders.shipping.post');
+
+                // 代客下单
+                Route::prefix('orders/create_for_customer')->middleware('can:orders_create')->name('orders.create_for_customer.')->group(function () {
+                    Route::get('/',                              [Controllers\OrderForCustomerController::class, 'create'])->name('create');
+                    Route::post('/',                             [Controllers\OrderForCustomerController::class, 'store'])->name('store');
+                    Route::get('customers/search',               [Controllers\OrderForCustomerController::class, 'searchCustomers'])->name('customers.search');
+                    Route::post('customers',                     [Controllers\OrderForCustomerController::class, 'storeCustomer'])->name('customers.store');
+                    Route::get('customers/{customer_id}/addresses', [Controllers\OrderForCustomerController::class, 'getCustomerAddresses'])->name('customers.addresses');
+                    Route::get('products/search',                [Controllers\OrderForCustomerController::class, 'searchProducts'])->name('products.search');
+                    Route::post('shipping_methods',              [Controllers\OrderForCustomerController::class, 'getShippingMethods'])->name('shipping_methods');
+                    Route::post('calculate',                     [Controllers\OrderForCustomerController::class, 'calculate'])->name('calculate');
+                });
+
                 Route::middleware('can:orders_show')->get('orders/{order}', [Controllers\OrderController::class, 'show'])->name('orders.show');
                 Route::middleware('can:orders_delete')->delete('orders/{order}', [Controllers\OrderController::class, 'destroy'])->name('orders.destroy');
                 Route::middleware('can:orders_update_status')->put('orders/{order}/status', [Controllers\OrderController::class, 'updateStatus'])->name('orders.update_status');
