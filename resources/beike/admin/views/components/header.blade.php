@@ -77,11 +77,11 @@
           </div>
         </li>
 
-        @hookwrapper('admin.header.upgrade')
-        <li class="nav-item update-btn me-2" style="display: none">
-          <a href="javascript:void(0)" class="btn btn-outline-primary btn-sm">@lang('admin/common.update_nav')</a>
-        </li>
-        @endhookwrapper
+{{--        @hookwrapper('admin.header.upgrade')--}}
+{{--        <li class="nav-item update-btn me-2" style="display: none">--}}
+{{--          <a href="javascript:void(0)" class="btn btn-outline-primary btn-sm">@lang('admin/common.update_nav')</a>--}}
+{{--        </li>--}}
+{{--        @endhookwrapper--}}
 
         @hookwrapper('admin.header.license')
         <li class="nav-item">
