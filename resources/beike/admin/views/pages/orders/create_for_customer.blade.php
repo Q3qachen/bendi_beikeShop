@@ -4,7 +4,7 @@
 
 @section('page-title-right')
   <a href="{{ admin_route('orders.index') }}" class="btn btn-outline-secondary btn-sm">
-    <i class="bi bi-arrow-left"></i> {{ __('common.back') }}
+    <i class="bi bi-arrow-left"></i> {{ __('common.return') }}
   </a>
 @endsection
 
@@ -83,7 +83,7 @@
               <th>商品</th>
               <th>SKU</th>
               <th>规格</th>
-              <th>单价</th>
+              <th style="width:130px">单价</th>
               <th style="width:130px">数量</th>
               <th class="text-end">小计</th>
               <th></th>
@@ -99,7 +99,10 @@
               </td>
               <td><small class="text-muted">@{{ item.sku }}</small></td>
               <td><small class="text-muted">@{{ item.variant_label || '—' }}</small></td>
-              <td>@{{ item.price_format }}</td>
+              <td>
+                <el-input-number v-model="item.price" :min="0" :precision="2" :controls="false"
+                  size="mini" style="width:110px" @change="onPriceChange"></el-input-number>
+              </td>
               <td>
                 <el-input-number v-model="item.quantity" :min="1" size="mini" style="width:110px"
                   @change="onQuantityChange"></el-input-number>
@@ -250,13 +253,13 @@
     </div>
   </div>
 
-  {{-- ─── 备注 + 提交 ─────────────────────────────────────────────────── --}}
+  {{-- ─── 运单号 + 提交 ─────────────────────────────────────────────────── --}}
   <div class="card mb-4">
     <div class="card-body">
       <div class="row">
         <div class="col-md-6">
-          <label class="form-label small">订单备注</label>
-          <textarea v-model="comment" class="form-control form-control-sm" rows="3" placeholder="选填"></textarea>
+          <label class="form-label small">运单号</label>
+          <el-input v-model="expressNumber" size="small" placeholder="选填，填写后将自动记录到发货信息"></el-input>
         </div>
       </div>
       <div class="mt-3">
@@ -358,8 +361,8 @@
       // Step 6: Totals
       totals: [],
 
-      // Comment
-      comment: '',
+      // 运单号
+      expressNumber: '',
 
       // Submit
       submitting: false,
@@ -426,6 +429,7 @@
         return this.orderProducts.map(p => ({
           sku_id:   p.sku_id,
           quantity: p.quantity,
+          price:    p.price,
         }));
       },
 
@@ -588,6 +592,12 @@
 
       onQuantityChange() {
         this.resetTotals();
+        this.calculateTotals();
+      },
+
+      onPriceChange() {
+        this.resetTotals();
+        this.calculateTotals();
       },
 
       formatCurrency(amount) {
@@ -711,7 +721,7 @@
             shipping_method_name: this.selectedShippingName,
             payment_method_code:  this.selectedPaymentCode,
             payment_method_name:  paymentMethod?.name || '',
-            comment:              this.comment,
+            express_number:       this.expressNumber,
           }, this.shippingPayload);
 
           this.submitting = true;

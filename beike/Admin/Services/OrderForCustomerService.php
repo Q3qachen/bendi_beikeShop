@@ -14,6 +14,7 @@ namespace Beike\Admin\Services;
 use Beike\Models\Cart;
 use Beike\Models\CartProduct;
 use Beike\Models\Order;
+use Beike\Models\OrderShipment;
 use Beike\Models\ProductSku;
 use Beike\Models\Zone;
 use Beike\Repositories\AddressRepo;
@@ -121,7 +122,15 @@ class OrderForCustomerService
             //    调用 current_customer()（前台 session），后台上下文始终为 null，
             //    会导致 shipping_address_id 被强制置 0
             $cartList = CartService::list($customer, true);
-            $carts    = CartService::reloadData($cartList);
+
+            // 若管理员手动修改了商品单价，则覆盖购物车内存数据及金额汇总
+            $skuPriceMap = self::buildSkuPriceMap($products);
+            if (! empty($skuPriceMap)) {
+                $cartList = self::overrideCartPrices($cartList, $skuPriceMap);
+                $totals   = self::recalculateTotals($totals, collect($cartList)->sum('subtotal'));
+            }
+
+            $carts = CartService::reloadData($cartList);
 
             $checkoutData = [
                 'customer' => $customer,
@@ -147,7 +156,18 @@ class OrderForCustomerService
                 // 7a. 创建订单主记录、订单商品、订单金额明细
                 $order = OrderRepo::create($checkoutData);
 
-                // 7b. 通过状态机将订单状态推进至 UNPAID（同时写入 OrderHistory）
+                // 7b. 若管理员填写了运单号，同步写入 order_shipments
+                $expressNumber = trim($data['express_number'] ?? '');
+                if ($expressNumber !== '') {
+                    OrderShipment::create([
+                        'order_id'        => $order->id,
+                        'express_code'    => '',
+                        'express_company' => '',
+                        'express_number'  => $expressNumber,
+                    ]);
+                }
+
+                // 7c. 通过状态机将订单状态推进至 UNPAID（同时写入 OrderHistory）
                 StateMachineService::getInstance($order)->changeStatus(StateMachineService::UNPAID, '', true);
 
                 hook_action('admin.order_for_customer.order_created.after', ['order' => $order, 'customer' => $customer]);
@@ -249,7 +269,15 @@ class OrderForCustomerService
                 $data['payment_method_code']  ?? ''
             );
 
-            return $checkout->totalService->getTotals($checkout);
+            $totals = $checkout->totalService->getTotals($checkout);
+
+            // 若管理员手动修改了商品单价，则重算 sub_total 和 order_total
+            $customSubTotal = self::computeSubTotalFromProducts($products);
+            if ($customSubTotal !== null) {
+                $totals = self::recalculateTotals($totals, $customSubTotal);
+            }
+
+            return $totals;
 
         } finally {
             self::clearCustomerCart($customer->id);
@@ -401,6 +429,10 @@ class OrderForCustomerService
             return '';
         }
 
+        if ($code === 'offline') {
+            return trans('admin/order.offline_payment');
+        }
+
         $payments = PaymentMethodItem::collection(PluginRepo::getPaymentMethods())->jsonSerialize();
         foreach ($payments as $payment) {
             if ($payment['code'] === $code) {
@@ -409,6 +441,115 @@ class OrderForCustomerService
         }
 
         return '';
+    }
+
+    /**
+     * 根据 products 数组中的 sku_id 构建「SKU编码 => 自定义单价」映射
+     *
+     * 仅对携带 price 字段的条目生效；未传 price 的商品保持原 SKU 价格。
+     *
+     * @param  array $products  [['sku_id' => int, 'quantity' => int, 'price' => float|null], ...]
+     * @return array            ['sku_code' => float, ...]
+     */
+    private static function buildSkuPriceMap(array $products): array
+    {
+        $map = [];
+        foreach ($products as $item) {
+            $skuId = (int) ($item['sku_id'] ?? 0);
+            if ($skuId <= 0 || ! isset($item['price']) || ! is_numeric($item['price'])) {
+                continue;
+            }
+            $sku = ProductSku::query()->find($skuId);
+            if ($sku) {
+                $map[$sku->sku] = (float) $item['price'];
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * 将自定义单价覆盖到购物车内存列表中（不写库）
+     *
+     * @param  array $cartList    CartDetail::collection()->jsonSerialize() 的结果
+     * @param  array $skuPriceMap ['sku_code' => float, ...]
+     * @return array              修改后的 cartList
+     */
+    private static function overrideCartPrices(array $cartList, array $skuPriceMap): array
+    {
+        foreach ($cartList as &$cart) {
+            $skuCode = $cart['product_sku'] ?? '';
+            if (! isset($skuPriceMap[$skuCode])) {
+                continue;
+            }
+            $newPrice             = $skuPriceMap[$skuCode];
+            $cart['price']        = $newPrice;
+            $cart['price_format'] = currency_format($newPrice);
+            $cart['subtotal']     = $newPrice * (int) ($cart['quantity'] ?? 1);
+            $cart['subtotal_format'] = currency_format($cart['subtotal']);
+        }
+        unset($cart);
+
+        return $cartList;
+    }
+
+    /**
+     * 从 products 数组计算自定义小计（price × quantity 之和）
+     *
+     * 若 products 中一条都没有 price 字段则返回 null（表示无需覆盖）。
+     *
+     * @param  array $products
+     * @return float|null
+     */
+    private static function computeSubTotalFromProducts(array $products): ?float
+    {
+        $hasPrice = false;
+        $total    = 0.0;
+        foreach ($products as $item) {
+            if (! isset($item['price']) || ! is_numeric($item['price'])) {
+                continue;
+            }
+            $hasPrice = true;
+            $total   += (float) $item['price'] * (int) ($item['quantity'] ?? 1);
+        }
+
+        return $hasPrice ? $total : null;
+    }
+
+    /**
+     * 用新的商品小计重算 totals 中的 sub_total 和 order_total
+     *
+     * 配送费、税费等其他费用保持不变，仅调整商品合计与订单总计。
+     *
+     * @param  array $totals          TotalService::getTotals() 返回的数组
+     * @param  float $customSubTotal  自定义商品小计
+     * @return array
+     */
+    private static function recalculateTotals(array $totals, float $customSubTotal): array
+    {
+        $originalSubTotal = 0.0;
+        foreach ($totals as $t) {
+            if (($t['code'] ?? '') === 'sub_total') {
+                $originalSubTotal = (float) ($t['amount'] ?? 0);
+                break;
+            }
+        }
+
+        $delta = $customSubTotal - $originalSubTotal;
+
+        foreach ($totals as &$t) {
+            if (($t['code'] ?? '') === 'sub_total') {
+                $t['amount']        = $customSubTotal;
+                $t['amount_format'] = currency_format($customSubTotal);
+            } elseif (($t['code'] ?? '') === 'order_total') {
+                $newTotal           = (float) ($t['amount'] ?? 0) + $delta;
+                $t['amount']        = $newTotal;
+                $t['amount_format'] = currency_format($newTotal);
+            }
+        }
+        unset($t);
+
+        return $totals;
     }
 
     /**

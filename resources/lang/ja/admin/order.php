@@ -51,4 +51,5 @@ return [
     'text_transaction_id'    => '取引IDです',
     'total'                  => '総計です',
     'website'                => 'ウェブサイトです',
+    'offline_payment'        => 'オフライン決済',
 ];

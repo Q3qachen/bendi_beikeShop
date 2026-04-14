@@ -55,4 +55,5 @@ return [
     'error_no_express_company'      => 'There is no courier company, please add it first',
     'to_add_express_company'        => 'Go Add',
     'create_for_customer'           => 'Order on Behalf',
+    'offline_payment'               => 'Offline Payment',
 ];

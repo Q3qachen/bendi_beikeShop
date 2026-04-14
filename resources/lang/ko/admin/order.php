@@ -51,4 +51,5 @@ return [
     'text_transaction_id'    => '거래 id',
     'total'                  => '총계',
     'website'                => '사이트',
+    'offline_payment'        => '오프라인 결제',
 ];

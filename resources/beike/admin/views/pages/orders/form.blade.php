@@ -33,6 +33,13 @@
                 <td>{{ __('admin/plugin.shipping') }}：</td>
                 <td>{{ $order->shipping_method_name }}</td>
               </tr>
+              @php $firstShipment = $order->orderShipments->first(); @endphp
+              @if($firstShipment && $firstShipment->express_number)
+              <tr>
+                <td>{{ __('order.express_number') }}：</td>
+                <td>{{ $firstShipment->express_number }}</td>
+              </tr>
+              @endif
             </tbody>
           </table>
         </div>
@@ -240,49 +247,49 @@
     </div>
   @endif
 
-  @if ($order->orderPayments)
-    @hookwrapper('admin.order.form.payments')
-    <div class="card mb-4">
-      <div class="card-header"><h6 class="card-title">{{ __('admin/order.payments_history') }}</h6></div>
-      <div class="card-body">
-        <div class="table-push">
-          <table class="table">
-            <thead class="">
-              <tr>
-                <th>{{ __('admin/order.order_id') }}</th>
-                <th>{{ __('admin/order.text_transaction_id') }}</th>
-                <th>{{ __('admin/order.text_request') }}</th>
-                <th>{{ __('admin/order.text_response') }}</th>
-                <th>{{ __('admin/order.text_callback') }}</th>
-                <th>{{ __('admin/order.text_receipt') }}</th>
-                <th>{{ __('order.created_at') }}</th>
-                <th>{{ __('order.updated_at') }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @foreach ($order->orderPayments as $payment)
-              <tr>
-                <td>{{ $payment->order_id }}</td>
-                <td>{{ $payment->transaction_id }}</td>
-                <td>{{ $payment->request }}</td>
-                <td>{{ $payment->response }}</td>
-                <td>{{ $payment->callback }}</td>
-                <td>
-                  @if ($payment->receipt)
-                  <a href="{{ image_origin($payment->receipt) }}" target="_blank">{{ __('admin/order.text_click_view') }}</a>
-                  @endif
-                </td>
-                <td>{{ $payment->created_at }}</td>
-                <td>{{ $payment->updated_at }}</td>
-              </tr>
-              @endforeach
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    @endhookwrapper
-  @endif
+{{--  @if ($order->orderPayments)--}}
+{{--    @hookwrapper('admin.order.form.payments')--}}
+{{--    <div class="card mb-4">--}}
+{{--      <div class="card-header"><h6 class="card-title">{{ __('admin/order.payments_history') }}</h6></div>--}}
+{{--      <div class="card-body">--}}
+{{--        <div class="table-push">--}}
+{{--          <table class="table">--}}
+{{--            <thead class="">--}}
+{{--              <tr>--}}
+{{--                <th>{{ __('admin/order.order_id') }}</th>--}}
+{{--                <th>{{ __('admin/order.text_transaction_id') }}</th>--}}
+{{--                <th>{{ __('admin/order.text_request') }}</th>--}}
+{{--                <th>{{ __('admin/order.text_response') }}</th>--}}
+{{--                <th>{{ __('admin/order.text_callback') }}</th>--}}
+{{--                <th>{{ __('admin/order.text_receipt') }}</th>--}}
+{{--                <th>{{ __('order.created_at') }}</th>--}}
+{{--                <th>{{ __('order.updated_at') }}</th>--}}
+{{--              </tr>--}}
+{{--            </thead>--}}
+{{--            <tbody>--}}
+{{--              @foreach ($order->orderPayments as $payment)--}}
+{{--              <tr>--}}
+{{--                <td>{{ $payment->order_id }}</td>--}}
+{{--                <td>{{ $payment->transaction_id }}</td>--}}
+{{--                <td>{{ $payment->request }}</td>--}}
+{{--                <td>{{ $payment->response }}</td>--}}
+{{--                <td>{{ $payment->callback }}</td>--}}
+{{--                <td>--}}
+{{--                  @if ($payment->receipt)--}}
+{{--                  <a href="{{ image_origin($payment->receipt) }}" target="_blank">{{ __('admin/order.text_click_view') }}</a>--}}
+{{--                  @endif--}}
+{{--                </td>--}}
+{{--                <td>{{ $payment->created_at }}</td>--}}
+{{--                <td>{{ $payment->updated_at }}</td>--}}
+{{--              </tr>--}}
+{{--              @endforeach--}}
+{{--            </tbody>--}}
+{{--          </table>--}}
+{{--        </div>--}}
+{{--      </div>--}}
+{{--    </div>--}}
+{{--    @endhookwrapper--}}
+{{--  @endif--}}
 
   @if ($order->orderShipments->count())
     @hookwrapper('admin.order.form.shipments')

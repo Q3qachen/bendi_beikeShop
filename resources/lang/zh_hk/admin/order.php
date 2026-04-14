@@ -51,4 +51,5 @@ return [
     'text_transaction_id'    => '交易ID',
     'total'                  => '總計',
     'website'                => '網站',
+    'offline_payment'        => '線下支付',
 ];

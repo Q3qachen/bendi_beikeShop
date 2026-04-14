@@ -58,4 +58,5 @@ return [
     'error_no_express_company'      => '没有快递公司，请先添加',
     'to_add_express_company'        => '去添加',
     'create_for_customer'           => '代客下单',
+    'offline_payment'               => '线下支付',
 ];

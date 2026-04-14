@@ -51,4 +51,5 @@ return [
     'text_transaction_id'    => 'ID transaksi',
     'total'                  => 'total',
     'website'                => 'situs',
+    'offline_payment'        => 'Pembayaran Offline',
 ];

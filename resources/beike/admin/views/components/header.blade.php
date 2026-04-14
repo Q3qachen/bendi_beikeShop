@@ -56,9 +56,9 @@
       <ul class="navbar navbar-right">
         @hook('admin.header.navbar.before')
 
-        <div class="alert alert-warning mb-0 warning-copyright {{ check_license() ? 'd-none' : '' }}">
-          <i class="bi bi-exclamation-triangle-fill"></i> {!! __('admin/common.copyright_hint_text') !!}
-        </div>
+{{--        <div class="alert alert-warning mb-0 warning-copyright {{ check_license() ? 'd-none' : '' }}">--}}
+{{--          <i class="bi bi-exclamation-triangle-fill"></i> {!! __('admin/common.copyright_hint_text') !!}--}}
+{{--        </div>--}}
 
         <li
           class="nav-item mx-2 license-ok {{ !check_license() || Str::endsWith(config('app.url'), '.test') ? 'd-none' : '' }}">

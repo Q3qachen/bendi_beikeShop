@@ -51,4 +51,5 @@ return [
     'text_transaction_id'    => 'transazioni',
     'total'                  => 'totale',
     'website'                => 'Sito web',
+    'offline_payment'        => 'Pagamento offline',
 ];

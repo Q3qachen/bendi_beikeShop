@@ -51,4 +51,5 @@ return [
     'text_transaction_id'    => 'Документы.',
     'total'                  => 'Общ сумм',
     'website'                => 'сайт',
+    'offline_payment'        => 'Офлайн-оплата',
 ];

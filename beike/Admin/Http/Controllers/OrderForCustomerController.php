@@ -60,8 +60,16 @@ class OrderForCustomerController extends Controller
             });
         })->values();
 
+        $pluginPaymentMethods = PaymentMethodItem::collection(PluginRepo::getPaymentMethods())->jsonSerialize();
+        $offlinePayment       = [
+            'code' => 'offline',
+            'name' => trans('admin/order.offline_payment'),
+            'icon' => '',
+        ];
+        $paymentMethods = array_merge([$offlinePayment], $pluginPaymentMethods);
+
         $data = [
-            'payment_methods' => PaymentMethodItem::collection(PluginRepo::getPaymentMethods())->jsonSerialize(),
+            'payment_methods' => $paymentMethods,
             'customer_groups' => CustomerGroupRepo::list(),
             'countries'       => CountryRepo::listEnabled(),
             'customers'       => Customer::query()->select(['id', 'name', 'email'])->orderBy('name')->get(),
@@ -94,7 +102,7 @@ class OrderForCustomerController extends Controller
             'shipping_method_name',
             'payment_method_code',
             'payment_method_name',
-            'comment',
+            'express_number',
         ]);
 
         try {
