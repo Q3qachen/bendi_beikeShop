@@ -79,34 +79,46 @@ class OrderForCustomerService
         // 2. 创建收货地址（同时作为付款地址）
         $address = AddressRepo::create(self::buildAddressData($data, $customer->id));
 
+        // ── Fix #3：用备份替代直接清空，代客下单结束后恢复用户真实购物车 ──────────────
+        $existingCartItems = [];
+        $orderCreated      = false;
+
         try {
-            // 3. 清理用户当前购物车（Cart + CartProduct），避免影响正式订单数据
-            self::clearCustomerCart($customer->id);
+            // 3. 备份用户当前购物车后清空，写入本次代客下单商品
+            $existingCartItems = self::backupAndClearCart($customer->id);
 
             // 4. 将管理员选择的商品批量写入 CartProduct
             self::fillCustomerCart($customer->id, $products);
 
             // 5. 创建 CheckoutService（构造函数内部会从 DB 读取 Cart 和已选商品）
-            //    由于步骤 3-4 已完成，构造函数不会抛出"空购物车"异常
             $checkout = new CheckoutService($customer);
 
-            // 将 Cart 更新为正确的地址和配送/支付方式
-            // CartRepo::createCart 不会覆盖非零的有效 address_id，所以这里直接更新
             $checkout->cart->update([
                 'shipping_address_id'  => $address->id,
                 'payment_address_id'   => $address->id,
                 'shipping_method_code' => $shippingMethodCode,
                 'payment_method_code'  => $paymentMethodCode,
             ]);
-            // 刷新实例，确保关联关系（shippingAddress / paymentAddress）反映最新数据
             $checkout->cart->refresh();
             $checkout->cart->load(['shippingAddress', 'paymentAddress']);
 
             // 重置 CartService 静态缓存，确保 initTotalService 读到最新购物车数据
             self::resetCartServiceCache();
-
-            // 初始化 TotalService（基于已更新的 Cart 和商品列表计算各项费用）
             $checkout->initTotalService();
+
+            // 6. 获取购物车列表，若管理员修改了单价则重建 TotalService
+            //    ── Fix #4：以自定义价格重建 TotalService，确保税费基于正确单价计算，
+            //               不再使用 recalculateTotals() 手动补丁 totals 数组 ──────────
+            $cartList    = CartService::list($customer, true);
+            $skuPriceMap = self::buildSkuPriceMap($products);
+            if (! empty($skuPriceMap)) {
+                $cartList = self::overrideCartPrices($cartList, $skuPriceMap);
+                self::resetCartServiceCache();
+                $totalClass             = hook_filter('service.checkout.total_service', 'Beike\Shop\Services\TotalService');
+                $checkout->totalService = new $totalClass($checkout->cart, $cartList);
+            }
+
+            // 统一在此处计算 totals（无论是否覆盖价格，只计算一次）
             $totals = $checkout->totalService->getTotals($checkout);
 
             // 解析方法名称（前端未传时回退到插件查询）
@@ -115,19 +127,6 @@ class OrderForCustomerService
             }
             if (empty($shippingMethodName) && ! empty($shippingMethodCode)) {
                 $shippingMethodName = self::resolveShippingMethodName($shippingMethodCode, $checkout);
-            }
-
-            // 6. 手动构建 checkoutData
-            //    不走 CheckoutService::checkoutData()，原因：该方法内的 shippingRequired()
-            //    调用 current_customer()（前台 session），后台上下文始终为 null，
-            //    会导致 shipping_address_id 被强制置 0
-            $cartList = CartService::list($customer, true);
-
-            // 若管理员手动修改了商品单价，则覆盖购物车内存数据及金额汇总
-            $skuPriceMap = self::buildSkuPriceMap($products);
-            if (! empty($skuPriceMap)) {
-                $cartList = self::overrideCartPrices($cartList, $skuPriceMap);
-                $totals   = self::recalculateTotals($totals, collect($cartList)->sum('subtotal'));
             }
 
             $carts = CartService::reloadData($cartList);
@@ -173,6 +172,7 @@ class OrderForCustomerService
                 hook_action('admin.order_for_customer.order_created.after', ['order' => $order, 'customer' => $customer]);
 
                 DB::commit();
+                $orderCreated = true;
             } catch (\Exception $e) {
                 DB::rollBack();
                 throw $e;
@@ -180,9 +180,20 @@ class OrderForCustomerService
 
             return $order;
 
+        } catch (\Exception $e) {
+            // ── Fix #2：订单未创建成功时删除已预建的收货地址，避免产生垃圾数据 ────────
+            if (! $orderCreated) {
+                try {
+                    AddressRepo::delete($address->id);
+                } catch (\Throwable $ignored) {
+                    // 清理失败不影响主异常传播
+                }
+            }
+            throw $e;
         } finally {
-            // 9. 无论成功或失败，始终清理临时购物车数据，不影响用户后续前台下单
+            // ── Fix #3：清理代客下单临时购物车，并恢复用户原有购物车商品 ──────────────
             self::clearCustomerCart($customer->id);
+            self::restoreCart($customer->id, $existingCartItems);
         }
     }
 
@@ -211,8 +222,11 @@ class OrderForCustomerService
 
         $tempAddress = AddressRepo::create(self::buildAddressData($data, $customer->id));
 
+        // Fix #3：备份用户购物车，避免临时操作破坏用户前台下单数据
+        $existingCartItems = [];
+
         try {
-            self::clearCustomerCart($customer->id);
+            $existingCartItems = self::backupAndClearCart($customer->id);
             self::fillCustomerCart($customer->id, $products);
 
             $checkout = self::buildCheckoutForCalculation(
@@ -231,6 +245,8 @@ class OrderForCustomerService
 
         } finally {
             self::clearCustomerCart($customer->id);
+            // Fix #3：恢复用户原有购物车
+            self::restoreCart($customer->id, $existingCartItems);
             AddressRepo::delete($tempAddress->id);
         }
     }
@@ -258,8 +274,11 @@ class OrderForCustomerService
 
         $tempAddress = AddressRepo::create(self::buildAddressData($data, $customer->id));
 
+        // Fix #3：备份用户购物车，避免临时操作破坏用户前台下单数据
+        $existingCartItems = [];
+
         try {
-            self::clearCustomerCart($customer->id);
+            $existingCartItems = self::backupAndClearCart($customer->id);
             self::fillCustomerCart($customer->id, $products);
 
             $checkout = self::buildCheckoutForCalculation(
@@ -269,18 +288,23 @@ class OrderForCustomerService
                 $data['payment_method_code']  ?? ''
             );
 
-            $totals = $checkout->totalService->getTotals($checkout);
-
-            // 若管理员手动修改了商品单价，则重算 sub_total 和 order_total
-            $customSubTotal = self::computeSubTotalFromProducts($products);
-            if ($customSubTotal !== null) {
-                $totals = self::recalculateTotals($totals, $customSubTotal);
+            // Fix #4：若管理员修改了单价，以自定义价格重建 TotalService，
+            //         确保税费、折扣均基于正确单价计算，而非手动补丁 totals 数组
+            $cartList    = CartService::list($customer, true);
+            $skuPriceMap = self::buildSkuPriceMap($products);
+            if (! empty($skuPriceMap)) {
+                $cartList = self::overrideCartPrices($cartList, $skuPriceMap);
+                self::resetCartServiceCache();
+                $totalClass             = hook_filter('service.checkout.total_service', 'Beike\Shop\Services\TotalService');
+                $checkout->totalService = new $totalClass($checkout->cart, $cartList);
             }
 
-            return $totals;
+            return $checkout->totalService->getTotals($checkout);
 
         } finally {
             self::clearCustomerCart($customer->id);
+            // Fix #3：恢复用户原有购物车
+            self::restoreCart($customer->id, $existingCartItems);
             AddressRepo::delete($tempAddress->id);
         }
     }
@@ -288,6 +312,63 @@ class OrderForCustomerService
     // ──────────────────────────────────────────────────────────────────────────
     // 私有辅助方法
     // ──────────────────────────────────────────────────────────────────────────
+
+    /**
+     * 备份用户当前购物车商品并清空购物车
+     *
+     * 代替直接调用 clearCustomerCart()，在代客下单临时占用购物车前
+     * 先将用户真实的购物车内容持久化到内存数组，供操作完成后恢复。
+     *
+     * @param  int   $customerId
+     * @return array 原有 CartProduct 行的快照（不含自增 id）
+     */
+    private static function backupAndClearCart(int $customerId): array
+    {
+        $items = CartProduct::query()
+            ->where('customer_id', $customerId)
+            ->get(['product_id', 'product_sku', 'quantity', 'selected', 'session_id'])
+            ->toArray();
+
+        CartProduct::query()->where('customer_id', $customerId)->delete();
+        Cart::query()->where('customer_id', $customerId)->delete();
+
+        return $items;
+    }
+
+    /**
+     * 将备份的购物车商品数据恢复到数据库
+     *
+     * 在代客下单流程（包括计算接口）的 finally 块中调用，
+     * 确保用户前台购物车不受影响。
+     * 恢复失败时仅记录警告日志，不抛出异常，避免掩盖主流程错误。
+     *
+     * @param  int   $customerId
+     * @param  array $cartItems  backupAndClearCart() 返回的快照数组
+     */
+    private static function restoreCart(int $customerId, array $cartItems): void
+    {
+        if (empty($cartItems)) {
+            return;
+        }
+
+        try {
+            foreach ($cartItems as $item) {
+                CartProduct::query()->create([
+                    'customer_id' => $customerId,
+                    'session_id'  => $item['session_id'] ?? '',
+                    'product_id'  => $item['product_id'],
+                    'product_sku' => $item['product_sku'],
+                    'quantity'    => $item['quantity'],
+                    'selected'    => $item['selected'],
+                ]);
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('代客下单：购物车恢复失败', [
+                'customer_id' => $customerId,
+                'error'       => $e->getMessage(),
+            ]);
+        }
+    }
 
     /**
      * 清理用户购物车（Cart 主表 + CartProduct 商品明细）

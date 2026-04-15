@@ -22,7 +22,9 @@ class CustomerDiscountService
     public static function getTotal(CheckoutService $checkout)
     {
         $totalService = $checkout->totalService;
-        $customer     = current_customer();
+        // 优先使用 CheckoutService 持有的目标用户（代客下单场景），
+        // 后台上下文中 current_customer() 为 null，若此处降级会导致折扣完全失效。
+        $customer     = $checkout->customer ?? current_customer();
         if (empty($customer)) {
             return null;
         }
