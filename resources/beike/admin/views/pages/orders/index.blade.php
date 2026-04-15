@@ -12,7 +12,7 @@
       @can('orders_create')
       <a href="{{ admin_route('orders.create_for_customer.create') }}"
          class="btn btn-primary btn-sm me-2">
-        <i class="bi bi-person-plus-fill"></i> 代客下单
+        <i class="bi bi-person-plus-fill"></i> {{ __('admin/order.create_for_customer') }}
       </a>
       @endcan
       <button type="button" class="btn btn-outline-secondary btn-print" onclick="app.btnPrint()"><i

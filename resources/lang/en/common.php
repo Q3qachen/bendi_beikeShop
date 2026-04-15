@@ -46,6 +46,7 @@ return [
     'choose'               => 'Choose',
     'export'               => 'Export',
     'filter'               => 'Filter',
+    'failed'               => 'Failed',
     'get_more'             => 'Get More',
     'get_success'          => 'Get Successfully!',
     'high'                 => 'High',

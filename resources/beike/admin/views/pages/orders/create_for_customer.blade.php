@@ -11,9 +11,9 @@
 @section('content')
 <div id="order-for-customer-app" v-cloak>
 
-  {{-- ─── Step 1：选择用户 ─────────────────────────────────────────── --}}
+  {{-- ─── Step 1: Select Customer ─────────────────────────────────────────── --}}
   <div class="card mb-4">
-    <div class="card-header"><h6 class="card-title">① 选择用户</h6></div>
+    <div class="card-header"><h6 class="card-title">{{ __('admin/order.step_select_customer') }}</h6></div>
     <div class="card-body">
       <div class="row align-items-start">
         <div class="col-md-7">
@@ -22,7 +22,7 @@
               v-model="selectedCustomerId"
               filterable
               clearable
-              placeholder="输入姓名或邮箱筛选用户"
+              placeholder="{{ __('admin/order.input_name_or_email') }}"
               style="width:100%"
               size="small"
               @change="onSelectCustomer"
@@ -34,7 +34,7 @@
                 :value="c.id">
               </el-option>
             </el-select>
-            <el-button size="small" @click="customerDialog.show = true">新建用户</el-button>
+            <el-button size="small" @click="customerDialog.show = true">{{ __('admin/order.new_customer') }}</el-button>
           </div>
           <div v-if="selectedCustomer" class="alert alert-success py-2 mb-0">
             <i class="bi bi-person-check-fill me-1"></i>
@@ -46,16 +46,16 @@
     </div>
   </div>
 
-  {{-- ─── Step 2：添加商品 ────────────────────────────────────────────── --}}
+  {{-- ─── Step 2: Add Products ────────────────────────────────────────────── --}}
   <div class="card mb-4">
-    <div class="card-header"><h6 class="card-title">② 添加商品</h6></div>
+    <div class="card-header"><h6 class="card-title">{{ __('admin/order.step_add_products') }}</h6></div>
     <div class="card-body">
       <div class="d-flex gap-2 mb-3">
         <el-select
           v-model="selectedSkuId"
           filterable
           clearable
-          placeholder="输入商品名称或 SKU 筛选"
+          placeholder="{{ __('admin/order.input_product_name_or_sku') }}"
           style="width:100%"
           size="small"
           @change="onSelectSku">
@@ -80,12 +80,12 @@
         <table class="table">
           <thead>
             <tr>
-              <th>商品</th>
+              <th>{{ __('admin/order.product_name') }}</th>
               <th>SKU</th>
-              <th>规格</th>
-              <th style="width:130px">单价</th>
-              <th style="width:130px">数量</th>
-              <th class="text-end">小计</th>
+              <th>{{ __('admin/order.specification') }}</th>
+              <th style="width:130px">{{ __('admin/order.unit_price') }}</th>
+              <th style="width:130px">{{ __('admin/order.quantity') }}</th>
+              <th class="text-end">{{ __('admin/order.subtotal') }}</th>
               <th></th>
             </tr>
           </thead>
@@ -117,23 +117,23 @@
           </tbody>
         </table>
       </div>
-      <div v-else class="text-muted small py-2">暂未添加商品</div>
+      <div v-else class="text-muted small py-2">{{ __('admin/order.no_products_added') }}</div>
     </div>
   </div>
 
-  {{-- ─── Step 3：收货信息 ────────────────────────────────────────────── --}}
+  {{-- ─── Step 3: Shipping Information ────────────────────────────────────────────── --}}
   <div class="card mb-4">
-    <div class="card-header"><h6 class="card-title">③ 收货信息</h6></div>
+    <div class="card-header"><h6 class="card-title">{{ __('admin/order.step_shipping_info') }}</h6></div>
     <div class="card-body">
 
-      {{-- 已有地址快速选择 --}}
+      {{-- Existing address quick select --}}
       <div class="mb-3" v-if="selectedCustomer">
         <div v-if="addressLoading" class="text-muted small mb-2">
-          <i class="bi bi-hourglass-split me-1"></i>加载地址中...
+          <i class="bi bi-hourglass-split me-1"></i>{{ __('admin/order.loading_address') }}
         </div>
         <div v-else-if="customerAddresses.length" class="d-flex align-items-center gap-2 mb-2">
-          <span class="text-muted small text-nowrap">选择已有地址：</span>
-          <el-select size="small" style="width:440px" placeholder="选择后自动填入下方表单"
+          <span class="text-muted small text-nowrap">{{ __('admin/order.select_existing_address') }}</span>
+          <el-select size="small" style="width:440px" placeholder="{{ __('admin/order.address_auto_fill') }}"
             v-model="selectedAddressId" clearable @change="applyAddress">
             <el-option
               v-for="addr in customerAddresses"
@@ -144,75 +144,75 @@
           </el-select>
         </div>
         <div v-else class="alert alert-warning py-2 small mb-2">
-          <i class="bi bi-exclamation-triangle me-1"></i>该用户暂无收货地址，请手动填写
+          <i class="bi bi-exclamation-triangle me-1"></i>{{ __('admin/order.no_shipping_address') }}
         </div>
       </div>
 
       <el-form :model="shippingForm" :rules="shippingRules" ref="shippingForm" label-width="90px">
         <div class="row">
           <div class="col-md-6">
-            <el-form-item label="收货人" prop="name">
-              <el-input v-model="shippingForm.name" size="small" placeholder="收货人姓名"></el-input>
+            <el-form-item label="{{ __('admin/order.receiver_name') }}" prop="name">
+              <el-input v-model="shippingForm.name" size="small" placeholder="{{ __('admin/order.receiver_name_placeholder') }}"></el-input>
             </el-form-item>
           </div>
           <div class="col-md-6">
-            <el-form-item label="手机号" prop="telephone">
-              <el-input v-model="shippingForm.telephone" size="small" placeholder="手机号码"></el-input>
+            <el-form-item label="{{ __('admin/order.phone_number') }}" prop="telephone">
+              <el-input v-model="shippingForm.telephone" size="small" placeholder="{{ __('admin/order.phone_placeholder') }}"></el-input>
             </el-form-item>
           </div>
         </div>
         <div class="row">
           <div class="col-md-4">
-            <el-form-item label="国家" prop="country_id">
+            <el-form-item label="{{ __('admin/order.country') }}" prop="country_id">
               <el-select v-model="shippingForm.country_id" filterable size="small" style="width:100%"
-                placeholder="选择国家" @change="onCountryChange">
+                placeholder="{{ __('admin/order.select_country') }}" @change="onCountryChange">
                 <el-option v-for="c in source.countries" :key="c.id" :label="c.name" :value="c.id"></el-option>
               </el-select>
             </el-form-item>
           </div>
           <div class="col-md-4">
-            <el-form-item label="省/州" prop="zone_id">
+            <el-form-item label="{{ __('admin/order.state_province') }}" prop="zone_id">
               <el-select v-model="shippingForm.zone_id" filterable size="small" style="width:100%"
-                placeholder="选择省/州">
+                placeholder="{{ __('admin/order.select_state') }}">
                 <el-option v-for="z in source.zones" :key="z.id" :label="z.name" :value="z.id"></el-option>
               </el-select>
             </el-form-item>
           </div>
           <div class="col-md-4">
-            <el-form-item label="城市" prop="city">
-              <el-input v-model="shippingForm.city" size="small" placeholder="城市"></el-input>
+            <el-form-item label="{{ __('admin/order.city') }}" prop="city">
+              <el-input v-model="shippingForm.city" size="small" placeholder="{{ __('admin/order.city_placeholder') }}"></el-input>
             </el-form-item>
           </div>
         </div>
         <div class="row">
           <div class="col-md-8">
-            <el-form-item label="详细地址" prop="address_1">
-              <el-input v-model="shippingForm.address_1" size="small" placeholder="街道、楼栋、门牌号"></el-input>
+            <el-form-item label="{{ __('admin/order.detailed_address') }}" prop="address_1">
+              <el-input v-model="shippingForm.address_1" size="small" placeholder="{{ __('admin/order.address_placeholder') }}"></el-input>
             </el-form-item>
           </div>
           <div class="col-md-4">
-            <el-form-item label="邮编">
-              <el-input v-model="shippingForm.zipcode" size="small" placeholder="邮政编码"></el-input>
+            <el-form-item label="{{ __('admin/order.zipcode') }}">
+              <el-input v-model="shippingForm.zipcode" size="small" placeholder="{{ __('admin/order.zipcode_placeholder') }}"></el-input>
             </el-form-item>
           </div>
         </div>
         <div class="mt-1">
           <el-button size="small" type="primary" plain :loading="loadingShipping"
             @click="loadShippingMethods" :disabled="!canLoadShipping">
-            <i class="bi bi-arrow-repeat me-1"></i>查询配送方式
+            <i class="bi bi-arrow-repeat me-1"></i>{{ __('admin/order.query_shipping_methods') }}
           </el-button>
-          <small class="text-muted ms-2" v-if="!canLoadShipping">请先选择用户并添加商品后再查询</small>
+          <small class="text-muted ms-2" v-if="!canLoadShipping">{{ __('admin/order.please_select_customer_and_products') }}</small>
         </div>
       </el-form>
     </div>
   </div>
 
-  {{-- ─── Step 4：配送方式 ────────────────────────────────────────────── --}}
+  {{-- ─── Step 4: Shipping Method ────────────────────────────────────────────── --}}
   <div class="card mb-4">
-    <div class="card-header"><h6 class="card-title">④ 配送方式</h6></div>
+    <div class="card-header"><h6 class="card-title">{{ __('admin/order.step_shipping_method') }}</h6></div>
     <div class="card-body">
-      <div v-if="loadingShipping" class="text-muted"><i class="bi bi-hourglass-split me-1"></i>查询中...</div>
-      <div v-else-if="shippingMethods.length === 0" class="text-muted small">暂无可用配送方式，请填写收货信息后点击"查询配送方式"</div>
+      <div v-if="loadingShipping" class="text-muted"><i class="bi bi-hourglass-split me-1"></i>{{ __('admin/order.loading_address') }}</div>
+      <div v-else-if="shippingMethods.length === 0" class="text-muted small">{{ __('admin/order.no_shipping_methods') }}，{{ __('admin/order.fill_shipping_info_first') }}</div>
       <el-radio-group v-else v-model="selectedShippingCode" @change="onShippingChange">
         <div v-for="method in shippingMethods" :key="method.code">
           <div class="mb-2 fw-bold small text-muted">@{{ method.name }}</div>
@@ -225,11 +225,11 @@
     </div>
   </div>
 
-  {{-- ─── Step 5：支付方式 ────────────────────────────────────────────── --}}
+  {{-- ─── Step 5: Payment Method ────────────────────────────────────────────── --}}
   <div class="card mb-4">
-    <div class="card-header"><h6 class="card-title">⑤ 支付方式</h6></div>
+    <div class="card-header"><h6 class="card-title">{{ __('admin/order.step_payment_method') }}</h6></div>
     <div class="card-body">
-      <div v-if="source.paymentMethods.length === 0" class="text-muted small">暂无可用支付方式</div>
+      <div v-if="source.paymentMethods.length === 0" class="text-muted small">{{ __('admin/order.no_payment_methods') }}</div>
       <el-radio-group v-else v-model="selectedPaymentCode">
         <el-radio v-for="p in source.paymentMethods" :key="p.code" :label="p.code" class="me-4">
           @{{ p.name }}
@@ -238,9 +238,9 @@
     </div>
   </div>
 
-  {{-- ─── Step 6：金额预览 ────────────────────────────────────────────── --}}
+  {{-- ─── Step 6: Amount Preview ────────────────────────────────────────────── --}}
   <div class="card mb-4" v-if="totals.length">
-    <div class="card-header"><h6 class="card-title">⑥ 金额预览</h6></div>
+    <div class="card-header"><h6 class="card-title">{{ __('admin/order.step_amount_preview') }}</h6></div>
     <div class="card-body">
       <table class="table table-borderless w-auto ms-auto">
         <tbody>
@@ -253,44 +253,44 @@
     </div>
   </div>
 
-  {{-- ─── 运单号 + 提交 ─────────────────────────────────────────────────── --}}
+  {{-- ─── Tracking Number + Submit ─────────────────────────────────────────────────── --}}
   <div class="card mb-4">
     <div class="card-body">
       <div class="row">
         <div class="col-md-6">
-          <label class="form-label small">运单号</label>
-          <el-input v-model="expressNumber" size="small" placeholder="选填，填写后将自动记录到发货信息"></el-input>
+          <label class="form-label small">{{ __('admin/order.tracking_number') }}</label>
+          <el-input v-model="expressNumber" size="small" placeholder="{{ __('admin/order.tracking_number_placeholder') }}"></el-input>
         </div>
       </div>
       <div class="mt-3">
         <el-button type="primary" size="medium" :loading="submitting" @click="submitOrder"
           :disabled="!canSubmit">
-          <i class="bi bi-check-circle me-1"></i>创建订单
+          <i class="bi bi-check-circle me-1"></i>{{ __('admin/order.create_order') }}
         </el-button>
-        <small v-if="!canSubmit" class="text-muted ms-3">请完成用户、商品、收货信息、配送方式、支付方式的选择</small>
+        <small v-if="!canSubmit" class="text-muted ms-3">{{ __('admin/order.complete_all_fields') }}</small>
       </div>
     </div>
   </div>
 
-  {{-- ─── 新建用户 Dialog ─────────────────────────────────────────────── --}}
-  <el-dialog title="新建用户" :visible.sync="customerDialog.show" width="500px"
+  {{-- ─── New Customer Dialog ─────────────────────────────────────────────── --}}
+  <el-dialog title="{{ __('admin/order.new_customer_title') }}" :visible.sync="customerDialog.show" width="500px"
     @close="resetCustomerDialog">
     <el-form :model="customerDialog.form" :rules="customerDialog.rules" ref="customerDialogForm"
       label-width="90px">
-      <el-form-item label="姓名" prop="name">
-        <el-input v-model="customerDialog.form.name" size="small" placeholder="用户姓名"></el-input>
+      <el-form-item label="{{ __('admin/order.customer_name') }}" prop="name">
+        <el-input v-model="customerDialog.form.name" size="small" placeholder="{{ __('admin/order.customer_name_placeholder') }}"></el-input>
       </el-form-item>
-      <el-form-item label="邮箱" prop="email">
-        <el-input v-model="customerDialog.form.email" size="small" placeholder="登录邮箱"></el-input>
+      <el-form-item label="{{ __('admin/order.email_address') }}" prop="email">
+        <el-input v-model="customerDialog.form.email" size="small" placeholder="{{ __('admin/order.email_placeholder') }}"></el-input>
       </el-form-item>
-      <el-form-item label="手机号">
-        <el-input v-model="customerDialog.form.telephone" size="small" placeholder="手机号（选填）"></el-input>
+      <el-form-item label="{{ __('admin/order.phone_number') }}">
+        <el-input v-model="customerDialog.form.telephone" size="small" placeholder="{{ __('admin/order.phone_optional') }}"></el-input>
       </el-form-item>
-      <el-form-item label="密码">
+      <el-form-item label="{{ __('admin/order.password') }}">
         <el-input v-model="customerDialog.form.password" size="small" type="password"
-          placeholder="留空则随机生成"></el-input>
+          placeholder="{{ __('admin/order.password_placeholder') }}"></el-input>
       </el-form-item>
-      <el-form-item label="用户分组">
+      <el-form-item label="{{ __('admin/order.customer_group') }}">
         <el-select v-model="customerDialog.form.customer_group_id" size="small" style="width:100%">
           <el-option v-for="g in source.customerGroups" :key="g.id"
             :label="g.description ? g.description.name : g.id" :value="g.id"></el-option>
@@ -298,9 +298,9 @@
       </el-form-item>
     </el-form>
     <span slot="footer">
-      <el-button size="small" @click="customerDialog.show = false">取消</el-button>
+      <el-button size="small" @click="customerDialog.show = false">{{ __('admin/order.cancel') }}</el-button>
       <el-button type="primary" size="small" :loading="customerDialog.saving"
-        @click="submitCreateCustomer">确认创建</el-button>
+        @click="submitCreateCustomer">{{ __('admin/order.confirm_create') }}</el-button>
     </span>
   </el-dialog>
 
@@ -369,10 +369,10 @@
 
       // Step 3: Shipping form validation rules
       shippingRules: {
-        name:       [{ required: true, message: '请输入收货人姓名', trigger: 'blur' }],
-        telephone:  [{ required: true, message: '请输入手机号', trigger: 'blur' }],
-        address_1:  [{ required: true, message: '请输入详细地址', trigger: 'blur' }],
-        country_id: [{ required: true, message: '请选择国家', trigger: 'change' }],
+        name:       [{ required: true, message: '{{ __('admin/order.input_receiver_name') }}', trigger: 'blur' }],
+        telephone:  [{ required: true, message: '{{ __('admin/order.input_phone') }}', trigger: 'blur' }],
+        address_1:  [{ required: true, message: '{{ __('admin/order.input_address') }}', trigger: 'blur' }],
+        country_id: [{ required: true, message: '{{ __('admin/order.select_country_required') }}', trigger: 'change' }],
       },
 
       // New customer dialog
@@ -387,10 +387,10 @@
           customer_group_id: '',
         },
         rules: {
-          name:  [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+          name:  [{ required: true, message: '{{ __('admin/order.input_customer_name') }}', trigger: 'blur' }],
           email: [
-            { required: true, message: '请输入邮箱', trigger: 'blur' },
-            { type: 'email', message: '邮箱格式不正确', trigger: 'blur' },
+            { required: true, message: '{{ __('admin/order.input_email') }}', trigger: 'blur' },
+            { type: 'email', message: '{{ __('admin/order.invalid_email') }}', trigger: 'blur' },
           ],
         },
       },
@@ -407,14 +407,14 @@
     },
 
     computed: {
-      // 是否满足查询配送方式的前提
+      // Whether shipping methods can be queried
       canLoadShipping() {
         return this.selectedCustomer &&
                this.orderProducts.length > 0 &&
                this.shippingForm.address_1;
       },
 
-      // 是否可以提交订单
+      // Whether order can be submitted
       canSubmit() {
         return this.selectedCustomer &&
                this.orderProducts.length > 0 &&
@@ -424,7 +424,7 @@
                this.selectedPaymentCode;
       },
 
-      // 组装给后端的 products 数组
+      // Products array for backend
       productsPayload() {
         return this.orderProducts.map(p => ({
           sku_id:   p.sku_id,
@@ -433,7 +433,7 @@
         }));
       },
 
-      // 组装地址公共字段
+      // Common address fields
       shippingPayload() {
         return {
           shipping_name:       this.shippingForm.name,
@@ -453,7 +453,7 @@
 
     methods: {
 
-      // ── 省份 ────────────────────────────────────────────────────────
+      // ── State/Province ────────────────────────────────────────────────────────
 
       onCountryChange(countryId) {
         if (!countryId) return;
@@ -472,11 +472,11 @@
         this.resetShippingForm();
         this.resetShippingState();
         if (!id) return;
-        // 加载该用户的收货地址列表
+        // Load customer's shipping addresses
         this.addressLoading = true;
         $http.get(_urls.addressesApi(id)).then(res => {
           this.customerAddresses = res.data.addresses || [];
-          // 自动回填默认地址
+          // Auto-fill default address
           const defaultId   = res.data.default_address_id;
           const defaultAddr = this.customerAddresses.find(a => a.id === defaultId)
                            || this.customerAddresses[0]
@@ -500,12 +500,12 @@
         this.shippingForm.city       = addr.city       || '';
         this.shippingForm.country_id = addr.country_id || '';
         this.shippingForm.zipcode    = addr.zipcode    || '';
-        // 先加载该国家的省份列表，完成后再赋值 zone_id，避免 onCountryChange 清空 zone_id
+        // Load state list first, then assign zone_id to avoid onCountryChange clearing it
         if (addr.country_id) {
           const zoneId = addr.zone_id || '';
           $http.get(_urls.zonesApi(addr.country_id)).then(res => {
             this.source.zones = res.data.zones || [];
-            // 等 Vue 将 el-option 列表渲染完毕后再绑定 zone_id，否则 el-select 匹配不到选项
+            // Wait for Vue to render el-option list before binding zone_id
             this.$nextTick(() => {
               this.shippingForm.zone_id = zoneId;
             });
@@ -534,10 +534,10 @@
           $http.post(_urls.storeCustomer, this.customerDialog.form).then(res => {
             layer.msg(res.message);
             const newCustomer = res.data;
-            // 插入下拉列表并按姓名排序
+            // Insert into dropdown and sort by name
             this.source.customers.push(newCustomer);
             this.source.customers.sort((a, b) => a.name.localeCompare(b.name));
-            // 自动选中新建用户（新用户无地址，清空地址状态）
+            // Auto-select new customer (no address, clear address state)
             this.selectedCustomerId = newCustomer.id;
             this.selectedCustomer   = newCustomer;
             this.customerAddresses  = [];
@@ -545,7 +545,7 @@
             this.customerDialog.show = false;
             this.resetShippingState();
           }).catch(err => {
-            layer.msg(err.responseJSON?.message || '创建失败');
+            layer.msg(err.responseJSON?.message || '{{ __('common.failed') }}');
           }).finally(() => {
             this.customerDialog.saving = false;
           });
@@ -626,7 +626,7 @@
 
           $http.post(_urls.shippingMethods, payload).then(res => {
             this.shippingMethods = res.data || [];
-            // 自动选中第一个可用方式
+            // Auto-select first available method
             if (this.shippingMethods.length) {
               const firstQuote = this.shippingMethods[0].quotes?.[0];
               if (firstQuote) {
@@ -636,7 +636,7 @@
               }
             }
           }).catch(err => {
-            layer.msg(err.responseJSON?.message || '获取配送方式失败');
+            layer.msg(err.responseJSON?.message || '{{ __('common.failed') }}');
           }).finally(() => {
             this.loadingShipping = false;
           });
@@ -644,7 +644,7 @@
       },
 
       onShippingChange(code) {
-        // 更新配送方式名称
+        // Update shipping method name
         for (const method of this.shippingMethods) {
           const quote = (method.quotes || []).find(q => q.code === code);
           if (quote) {
@@ -692,7 +692,7 @@
         this.shippingForm.country_id = _defaultCountryId;
         this.shippingForm.zipcode    = '';
         this.source.zones            = [];
-        // 重置后重新加载默认国家的省份，确保省份下拉始终可用
+        // Reload states for default country after reset
         if (_defaultCountryId) {
           $http.get(_urls.zonesApi(_defaultCountryId)).then(res => {
             this.source.zones = res.data.zones || [];
@@ -707,11 +707,11 @@
 
         this.$refs.shippingForm.validate(valid => {
           if (!valid) {
-            layer.msg('请完整填写收货信息');
+            layer.msg('{{ __('admin/order.incomplete_shipping_info') }}');
             return;
           }
 
-          // 补充支付方式名称
+          // Get payment method name
           const paymentMethod = this.source.paymentMethods.find(p => p.code === this.selectedPaymentCode);
 
           const payload = Object.assign({
@@ -726,12 +726,12 @@
 
           this.submitting = true;
           $http.post(_urls.store, payload).then(res => {
-            layer.msg(res.message || '订单创建成功');
+            layer.msg(res.message || '{{ __('admin/order.create_order_success') }}');
             setTimeout(() => {
               window.location.href = res.data?.order_url || _urls.ordersIndex;
             }, 800);
           }).catch(err => {
-            layer.msg(err.responseJSON?.message || '创建订单失败，请检查填写内容');
+            layer.msg(err.responseJSON?.message || '{{ __('admin/order.create_order_failed') }}');
           }).finally(() => {
             this.submitting = false;
           });

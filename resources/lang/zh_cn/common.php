@@ -15,6 +15,7 @@ return [
     'email'                => '邮箱',
     'unauthenticated'      => '请先登录',
     'success'              => '成功',
+    'failed'               => '失败',
     'no_data'              => '暂无数据～',
     'empty_items'          => '没有数据',
     'created_success'      => '创建成功!',
