@@ -60,6 +60,10 @@ class OrderForCustomerController extends Controller
             });
         })->values();
 
+
+
+//        akaka
+
         $pluginPaymentMethods = PaymentMethodItem::collection(PluginRepo::getPaymentMethods())->jsonSerialize();
         $offlinePayment       = [
             'code' => 'offline',
