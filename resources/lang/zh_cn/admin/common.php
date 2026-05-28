@@ -95,6 +95,7 @@ return [
     'brands_index'           => '商品品牌',
     'orders_index'           => '订单列表',
     'orders_trashed'         => '回收站',
+    'orders_create_for_customer' => '代客下单',
     'rmas_index'             => '售后管理',
     'rma_reasons_index'      => '售后原因',
     'customers_index'        => '客户管理',

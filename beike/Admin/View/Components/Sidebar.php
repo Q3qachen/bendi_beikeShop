@@ -367,7 +367,8 @@ class Sidebar extends Component
     public function getOrderSubRoutes()
     {
         $routes = [
-            ['route' => 'orders.index', 'prefixes' => ['orders'], 'excludes' => ['orders.trashed']],
+            ['route' => 'orders.index', 'prefixes' => ['orders'], 'excludes' => ['orders.trashed', 'orders.create_for_customer.create']],
+            ['route' => 'orders.create_for_customer.create', 'prefixes' => ['orders'], 'title' => trans('admin/order.create_for_customer')],
             ['route' => 'rmas.index', 'prefixes' => ['rmas']],
             ['route' => 'rma_reasons.index', 'prefixes' => ['rma_reasons']],
             ['route' => 'orders.trashed', 'prefixes' => ['orders'], 'excludes' => ['orders.index', 'orders.show', 'orders.create_for_customer.create']],

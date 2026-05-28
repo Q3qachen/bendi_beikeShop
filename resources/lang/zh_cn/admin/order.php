@@ -24,6 +24,7 @@ return [
     'orders_restore'              => '恢复订单',
     'notify'                      => '是否提醒',
     'orders_update_status'        => '更新状态',
+    'orders_create_for_customer'  => '代客下单',
     'error_status'                => '请选择状态',
     'payments_history'            => '支付信息',
     'text_response'               => '返回数据',

@@ -170,7 +170,7 @@ Route::prefix($adminName)
                 Route::middleware('can:orders_show')->post('orders/shipping', [Controllers\OrderController::class, 'shipping'])->name('orders.shipping.post');
 
                 // 代客下单
-                Route::prefix('orders/create_for_customer')->middleware('can:orders_create')->name('orders.create_for_customer.')->group(function () {
+                Route::prefix('orders/create_for_customer')->middleware('can:orders_create_for_customer')->name('orders.create_for_customer.')->group(function () {
                     Route::get('/',                              [Controllers\OrderForCustomerController::class, 'create'])->name('create');
                     Route::post('/',                             [Controllers\OrderForCustomerController::class, 'store'])->name('store');
                     Route::get('customers/search',               [Controllers\OrderForCustomerController::class, 'searchCustomers'])->name('customers.search');
