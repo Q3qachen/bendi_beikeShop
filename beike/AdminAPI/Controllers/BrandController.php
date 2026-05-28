@@ -19,7 +19,7 @@ use Illuminate\Http\Request;
 class BrandController
 {
     /**
-     * 显示品牌列表
+     * 显示品牌列表1
      * @param Request $request
      * @return mixed
      */
