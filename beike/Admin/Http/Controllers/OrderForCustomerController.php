@@ -66,7 +66,12 @@ class OrderForCustomerController extends Controller
             'name' => trans('admin/order.offline_payment'),
             'icon' => '',
         ];
-        $paymentMethods = array_merge([$offlinePayment], $pluginPaymentMethods);
+        $onlinePayment        = [
+            'code' => 'online',
+            'name' => trans('admin/order.online_payment'),
+            'icon' => '',
+        ];
+        $paymentMethods = array_merge([$offlinePayment, $onlinePayment], $pluginPaymentMethods);
 
         $data = [
             'payment_methods' => $paymentMethods,

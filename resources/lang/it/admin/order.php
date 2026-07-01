@@ -52,4 +52,11 @@ return [
     'total'                  => 'totale',
     'website'                => 'Sito web',
     'offline_payment'        => 'Pagamento offline',
+    'online_payment'         => 'Pagamento online',
+
+    'edit_field_invalid_field'      => 'Campo non supportato',
+    'edit_field_number_required'    => 'Il numero d\'ordine non può essere vuoto',
+    'edit_field_number_exists'      => 'Il numero d\'ordine esiste già',
+    'edit_field_invalid_datetime'   => 'Formato data/ora non valido',
+    'edit_field_empty'              => 'Non può essere vuoto',
 ];

@@ -52,4 +52,11 @@ return [
     'total'                  => '總計',
     'website'                => '網站',
     'offline_payment'        => '線下支付',
+    'online_payment'         => '線上支付',
+
+    'edit_field_invalid_field'      => '不支援修改的欄位',
+    'edit_field_number_required'    => '訂單號不能為空',
+    'edit_field_number_exists'      => '訂單號已存在',
+    'edit_field_invalid_datetime'   => '時間格式不正確',
+    'edit_field_empty'              => '不能為空',
 ];

@@ -56,6 +56,7 @@ return [
     'to_add_express_company'        => 'Go Add',
     'create_for_customer'           => 'Order on Behalf',
     'offline_payment'               => 'Offline Payment',
+    'online_payment'                => 'Online Payment',
     
     // Order for Customer page translations
     'step_select_customer'          => 'Step 1: Select Customer',
@@ -130,4 +131,10 @@ return [
     'incomplete_shipping_info'      => 'Please complete shipping information',
     'create_order_success'          => 'Order created successfully',
     'create_order_failed'           => 'Failed to create order, please check the information',
+
+    'edit_field_invalid_field'      => 'Unsupported field',
+    'edit_field_number_required'    => 'Order number cannot be empty',
+    'edit_field_number_exists'      => 'Order number already exists',
+    'edit_field_invalid_datetime'   => 'Invalid datetime format',
+    'edit_field_empty'              => 'Cannot be empty',
 ];

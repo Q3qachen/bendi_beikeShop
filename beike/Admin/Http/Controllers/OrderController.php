@@ -131,6 +131,63 @@ class OrderController extends Controller
     }
 
     /**
+     * 更新订单单字段（订单号 / 创建时间 / 更新时间）
+     * 供订单列表页双击单元格编辑使用
+     *
+     * @param Request $request
+     * @param Order   $order
+     * @return JsonResponse
+     * @throws \Throwable
+     */
+    public function updateField(Request $request, Order $order): JsonResponse
+    {
+        $field = $request->get('field');
+        $value = (string) $request->get('value', '');
+
+        $allowedFields = ['number', 'created_at', 'updated_at'];
+        if (! in_array($field, $allowedFields, true)) {
+            return json_fail(trans('admin/order.edit_field_invalid_field'));
+        }
+
+        $parsed = null;
+        if ($field === 'number') {
+            $value = trim($value);
+            if ($value === '') {
+                return json_fail(trans('admin/order.edit_field_number_required'));
+            }
+            $exists = Order::query()
+                ->where('number', $value)
+                ->where('id', '<>', $order->id)
+                ->exists();
+            if ($exists) {
+                return json_fail(trans('admin/order.edit_field_number_exists'));
+            }
+            $order->number = $value;
+        } else {
+            // created_at / updated_at
+            try {
+                $value = trim($value);
+                // 兼容 datetime-local 的 "Y-m-dTH:i" 格式
+                $value = str_replace('T', ' ', $value);
+                $parsed = \Carbon\Carbon::parse($value)->format('Y-m-d H:i:s');
+            } catch (\Throwable $e) {
+                return json_fail(trans('admin/order.edit_field_invalid_datetime'));
+            }
+            $order->{$field} = $parsed;
+        }
+
+        // 关闭 timestamps 自动更新，避免覆盖 updated_at
+        $order->timestamps = false;
+        $order->saveOrFail();
+
+        hook_action('admin.order.update_field.after', ['order' => $order, 'field' => $field, 'value' => $value]);
+
+        $displayValue = $field === 'number' ? $value : $parsed;
+
+        return json_success(trans('common.updated_success'), ['value' => $displayValue]);
+    }
+
+    /**
      * 更新发货信息
      */
     public function updateShipment(Request $request, Order $order, int $orderShipmentId): JsonResponse

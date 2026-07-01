@@ -52,4 +52,11 @@ return [
     'total'                  => '총계',
     'website'                => '사이트',
     'offline_payment'        => '오프라인 결제',
+    'online_payment'         => '온라인 결제',
+
+    'edit_field_invalid_field'      => '지원되지 않는 필드',
+    'edit_field_number_required'    => '주문 번호는 비워둘 수 없습니다',
+    'edit_field_number_exists'      => '주문 번호가 이미 존재합니다',
+    'edit_field_invalid_datetime'   => '잘못된 날짜/시간 형식',
+    'edit_field_empty'              => '비워둘 수 없습니다',
 ];

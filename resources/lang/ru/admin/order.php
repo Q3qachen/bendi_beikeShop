@@ -52,4 +52,11 @@ return [
     'total'                  => 'Общ сумм',
     'website'                => 'сайт',
     'offline_payment'        => 'Офлайн-оплата',
+    'online_payment'         => 'Онлайн-оплата',
+
+    'edit_field_invalid_field'      => 'Неподдерживаемое поле',
+    'edit_field_number_required'    => 'Номер заказа не может быть пустым',
+    'edit_field_number_exists'      => 'Номер заказа уже существует',
+    'edit_field_invalid_datetime'   => 'Неверный формат даты/времени',
+    'edit_field_empty'              => 'Не может быть пустым',
 ];

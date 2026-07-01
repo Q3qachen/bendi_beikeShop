@@ -184,6 +184,7 @@ Route::prefix($adminName)
                 Route::middleware('can:orders_show')->get('orders/{order}', [Controllers\OrderController::class, 'show'])->name('orders.show');
                 Route::middleware('can:orders_delete')->delete('orders/{order}', [Controllers\OrderController::class, 'destroy'])->name('orders.destroy');
                 Route::middleware('can:orders_update_status')->put('orders/{order}/status', [Controllers\OrderController::class, 'updateStatus'])->name('orders.update_status');
+                Route::middleware('can:orders_update_status')->put('orders/{order}/field', [Controllers\OrderController::class, 'updateField'])->name('orders.update_field');
                 Route::middleware('can:orders_update_status')->put('orders/{order}/shipments/{shipment}', [Controllers\OrderController::class, 'updateShipment'])->name('orders.update_shipment');
                 Route::middleware('can:orders_update_status')->post('orders/{order}/shipments', [Controllers\OrderController::class, 'createShipment'])->name('orders.create_shipment');
 

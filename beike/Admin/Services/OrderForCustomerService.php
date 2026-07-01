@@ -514,6 +514,10 @@ class OrderForCustomerService
             return trans('admin/order.offline_payment');
         }
 
+        if ($code === 'online') {
+            return trans('admin/order.online_payment');
+        }
+
         $payments = PaymentMethodItem::collection(PluginRepo::getPaymentMethods())->jsonSerialize();
         foreach ($payments as $payment) {
             if ($payment['code'] === $code) {

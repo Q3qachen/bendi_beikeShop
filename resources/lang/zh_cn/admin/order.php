@@ -60,6 +60,7 @@ return [
     'to_add_express_company'        => '去添加',
     'create_for_customer'           => '代客下单',
     'offline_payment'               => '线下支付',
+    'online_payment'                => '线上支付',
 
     // 代客下单页面翻译
     'step_select_customer'          => '① 选择用户',
@@ -134,4 +135,10 @@ return [
     'incomplete_shipping_info'      => '请完整填写收货信息',
     'create_order_success'          => '订单创建成功',
     'create_order_failed'           => '创建订单失败，请检查填写内容',
+
+    'edit_field_invalid_field'      => '不支持修改的字段',
+    'edit_field_number_required'    => '订单号不能为空',
+    'edit_field_number_exists'      => '订单号已存在',
+    'edit_field_invalid_datetime'   => '时间格式不正确',
+    'edit_field_empty'              => '不能为空',
 ];

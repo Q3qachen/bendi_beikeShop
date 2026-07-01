@@ -52,4 +52,11 @@ return [
     'total'                  => 'Addiert.',
     'website'                => 'netzwerk',
     'offline_payment'        => 'Offline-Zahlung',
+    'online_payment'         => 'Online-Zahlung',
+
+    'edit_field_invalid_field'      => 'Nicht unterstütztes Feld',
+    'edit_field_number_required'    => 'Bestellnummer darf nicht leer sein',
+    'edit_field_number_exists'      => 'Bestellnummer bereits vorhanden',
+    'edit_field_invalid_datetime'   => 'Ungültiges Datumsformat',
+    'edit_field_empty'              => 'Darf nicht leer sein',
 ];

@@ -52,4 +52,11 @@ return [
     'total'                  => 'total',
     'website'                => 'Le site web',
     'offline_payment'        => 'Paiement hors ligne',
+    'online_payment'         => 'Paiement en ligne',
+
+    'edit_field_invalid_field'      => 'Champ non pris en charge',
+    'edit_field_number_required'    => 'Le numéro de commande ne peut pas être vide',
+    'edit_field_number_exists'      => 'Le numéro de commande existe déjà',
+    'edit_field_invalid_datetime'   => 'Format de date/heure invalide',
+    'edit_field_empty'              => 'Ne peut pas être vide',
 ];

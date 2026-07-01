@@ -52,4 +52,11 @@ return [
     'total'                  => '総計です',
     'website'                => 'ウェブサイトです',
     'offline_payment'        => 'オフライン決済',
+    'online_payment'         => 'オンライン決済',
+
+    'edit_field_invalid_field'      => 'サポートされていないフィールド',
+    'edit_field_number_required'    => '注文番号は空にできません',
+    'edit_field_number_exists'      => '注文番号はすでに存在します',
+    'edit_field_invalid_datetime'   => '日時形式が正しくありません',
+    'edit_field_empty'              => '空にできません',
 ];

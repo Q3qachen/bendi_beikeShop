@@ -52,4 +52,11 @@ return [
     'total'                  => 'total',
     'website'                => 'situs',
     'offline_payment'        => 'Pembayaran Offline',
+    'online_payment'         => 'Pembayaran Online',
+
+    'edit_field_invalid_field'      => 'Bidang tidak didukung',
+    'edit_field_number_required'    => 'Nomor pesanan tidak boleh kosong',
+    'edit_field_number_exists'      => 'Nomor pesanan sudah ada',
+    'edit_field_invalid_datetime'   => 'Format tanggal/waktu tidak valid',
+    'edit_field_empty'              => 'Tidak boleh kosong',
 ];

@@ -105,16 +105,19 @@
             @if (count($orders))
               @foreach ($orders as $order)
                 <tr data-hook-id="{{ $order->id }}">
-                  <td><input type="checkbox" :value="{{ $order['id'] }}" v-model="selectedIds"/></td>
-                  <td>{{ $order->id }}</td>
-                  <td>{{ $order->number }}</td>
-                  <td>{{ sub_string($order->customer_name, 14) }}</td>
-                  <td>{{ $order->payment_method_name }}</td>
-                  <td>{{ $order->status_format }}</td>
-                  <td>{{ currency_format($order->total, $order->currency_code, $order->currency_value) }}</td>
-                  @hook('admin.order.list.item.td.total.after', $order)
-                  <td>{{ $order->created_at }}</td>
-                  <td>{{ $order->updated_at }}</td>
+              <td><input type="checkbox" :value="{{ $order['id'] }}" v-model="selectedIds"/></td>
+              <td>{{ $order->id }}</td>
+              @php
+                $canEditField = !$order->deleted_at && $type != 'trashed';
+              @endphp
+              <td @if($canEditField) class="editable-cell" data-field="number" data-id="{{ $order->id }}" data-value="{{ $order->number }}" @endif>{{ $order->number }}</td>
+              <td>{{ sub_string($order->customer_name, 14) }}</td>
+              <td>{{ $order->payment_method_name }}</td>
+              <td>{{ $order->status_format }}</td>
+              <td>{{ currency_format($order->total, $order->currency_code, $order->currency_value) }}</td>
+              @hook('admin.order.list.item.td.total.after', $order)
+              <td @if($canEditField) class="editable-cell" data-field="created_at" data-id="{{ $order->id }}" data-value="{{ $order->created_at }}" @endif>{{ $order->created_at }}</td>
+              <td @if($canEditField) class="editable-cell" data-field="updated_at" data-id="{{ $order->id }}" data-value="{{ $order->updated_at }}" @endif>{{ $order->updated_at }}</td>
                   <td>
                     @if (!$order->deleted_at)
                       <a href="{{ admin_route('orders.show', [$order->id]) }}"
@@ -280,6 +283,82 @@
       $http.put(`orders/restore/${id}`).then((res) => {
         window.location.reload();
       })
+    });
+
+    // ── 双击单元格编辑（订单号 / 创建时间 / 更新时间） ──────────────────────
+    $('.editable-cell').on('dblclick', function () {
+      const $td = $(this);
+      if ($td.find('input').length > 0) return; // 已在编辑中
+
+      const field    = $td.data('field');
+      const orderId  = $td.data('id');
+      const oldValue = String($td.data('value') ?? '');
+      const isTime   = field === 'created_at' || field === 'updated_at';
+
+      // datetime-local 需要 "Y-m-dTH:i" 格式
+      let inputVal = oldValue;
+      if (isTime && oldValue.length >= 16) {
+        inputVal = oldValue.substring(0, 16).replace(' ', 'T');
+      }
+
+      const inputType = isTime ? 'datetime-local' : 'text';
+      const $input = $(`<input type="${inputType}" class="form-control form-control-sm" style="min-width:180px" value="${inputVal}">`);
+      $td.html($input);
+      $input.focus().select();
+
+      let submitted = false;
+
+      const submit = () => {
+        if (submitted) return;
+        submitted = true;
+
+        const newVal = ($input.val() || '').trim();
+        // 值未变化直接还原
+        if (isTime) {
+          const normalizedNew = newVal.replace('T', ' ');
+          const normalizedOld = oldValue.substring(0, 16);
+          if (normalizedNew === normalizedOld) {
+            $td.html(oldValue);
+            return;
+          }
+        } else if (newVal === oldValue) {
+          $td.html(oldValue);
+          return;
+        }
+
+        if (newVal === '') {
+          layer.msg('{{ __('admin/order.edit_field_empty') }}');
+          $td.html(oldValue);
+          return;
+        }
+
+        $http.put(`orders/${orderId}/field`, { field: field, value: newVal }).then((res) => {
+          const display = res.data?.value ?? newVal;
+          $td.html(display);
+          $td.data('value', display);
+          layer.msg(res.message || '{{ __('common.updated_success') }}');
+        }).catch((err) => {
+          $td.html(oldValue);
+          layer.msg(err.responseJSON?.message || '{{ __('common.failed') }}');
+        });
+      };
+
+      const cancel = () => {
+        if (submitted) return;
+        submitted = true;
+        $td.html(oldValue);
+      };
+
+      $input.on('blur', submit);
+      $input.on('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          submit();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          cancel();
+        }
+      });
     });
   </script>
 @endpush
